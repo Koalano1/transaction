@@ -1,6 +1,5 @@
 package com.demo.transaction.controller;
 
-import com.demo.transaction.dto.DistributedTransaction;
 import com.demo.transaction.model.entities.Transaction;
 import com.demo.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,7 @@ public class TransactionController {
     }
 
     @GetMapping("users/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionById(@PathVariable String userId) {
+    public ResponseEntity<List<Transaction>> getTransactionById(@PathVariable Long userId) {
         List<Transaction> transactions = transactionService.listTransactionsByUserId(userId);
         if (transactions.isEmpty()) {
             return ResponseEntity.noContent().build();

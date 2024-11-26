@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public List<Transaction> listTransactionsByUserId(String userId) {
+    public List<Transaction> listTransactionsByUserId(Long userId) {
         return transactionRepository.findByUserId(userId);
     }
 
@@ -35,10 +37,10 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction) {
         Account sender = accountRepository.findById(transaction.getSenderAccount().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Sender account not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Sender account with ID " + transaction.getSenderAccount().getId() + " not found"));
 
         Account receiver = accountRepository.findById(transaction.getReceiverAccount().getId())
-                .orElseThrow(() -> new AccountProcessingException("Receiver account not found"));
+                .orElseThrow(() -> new AccountProcessingException("Receiver account with ID " + transaction.getReceiverAccount().getId() + " not found"));
 
         if (sender.getStatus() != AccountStatus.ACTIVE || receiver.getStatus() != AccountStatus.ACTIVE) {
             throw new AccountProcessingException("Both accounts must be active to perform the transaction.");
@@ -54,6 +56,13 @@ public class TransactionServiceImpl implements TransactionService {
         accountRepository.save(sender);
         accountRepository.save(receiver);
 
-        return transactionRepository.save(transaction);
+        Transaction transactions = new Transaction();
+        transactions.setSenderAccount(sender);
+        transactions.setReceiverAccount(receiver);
+        transactions.setAmount(transaction.getAmount());
+        transactions.setCreatedAt(LocalDateTime.now());
+        Transaction savedTransaction = transactionRepository.save(transaction);
+
+        return transactionRepository.save(savedTransaction);
     }
 }

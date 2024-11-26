@@ -12,12 +12,12 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/transactions")
+@RequestMapping("/api/v1/transactions")
 public class TransactionController {
 
     private final TransactionService transactionService;
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<List<Transaction>> createTransaction(@RequestBody List<Transaction> transaction) {
         List<Transaction> savedTransactions = new ArrayList<>();
 

@@ -9,9 +9,5 @@ import java.util.List;
 
 public interface AccountService {
 
-//    ResponseEntity<Account> add(AccountRequestDto request);
-//
-//    List<Account> findByUserId(Long userId);
-
     ResponseEntity<Account> register(Account account);
 }

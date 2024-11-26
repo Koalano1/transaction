@@ -3,6 +3,7 @@ package com.demo.transaction.service.impl;
 import com.demo.transaction.exception.AccountProcessingException;
 import com.demo.transaction.mapper.AccountMapper;
 import com.demo.transaction.model.entities.Account;
+import com.demo.transaction.model.enums.AccountStatus;
 import com.demo.transaction.repository.AccountRepository;
 import com.demo.transaction.service.AccountService;
 import jakarta.transaction.Transactional;
@@ -29,10 +30,19 @@ public class AccountServiceImpl implements AccountService {
             throw new AccountProcessingException("User with username " + account.getUsername() + " already exists");
         }
 
+        if (account.getStatus() == null) {
+            account.setStatus(AccountStatus.ACTIVE);
+        }
+
+        if (account.getBalance() == null) {
+            account.setBalance(BigDecimal.ZERO);
+        }
+
         Account user = Account.builder()
                 .username(account.getUsername())
                 .email(account.getEmail())
-                .balance(BigDecimal.ZERO)
+                .status(account.getStatus())
+                .balance(account.getBalance())
                 .build();
 
         accountRepository.save(user);

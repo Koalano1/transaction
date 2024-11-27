@@ -1,6 +1,6 @@
 package com.demo.transaction.service.impl;
 
-import com.demo.transaction.exception.AccountProcessingException;
+import com.demo.transaction.exception.UnprocessableEntityException;
 import com.demo.transaction.model.entities.Account;
 import com.demo.transaction.model.entities.Transaction;
 import com.demo.transaction.model.enums.AccountStatus;
@@ -34,17 +34,17 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public Transaction createTransaction(Transaction transaction) {
         Account sender = accountRepository.findById(transaction.getSenderAccount().getId())
-                .orElseThrow(() -> new AccountProcessingException("Sender account with ID " + transaction.getSenderAccount().getId() + " not found"));
+                .orElseThrow(() -> new UnprocessableEntityException("Sender account with ID " + transaction.getSenderAccount().getId() + " not found"));
 
         Account receiver = accountRepository.findById(transaction.getReceiverAccount().getId())
-                .orElseThrow(() -> new AccountProcessingException("Receiver account with ID " + transaction.getReceiverAccount().getId() + " not found"));
+                .orElseThrow(() -> new UnprocessableEntityException("Receiver account with ID " + transaction.getReceiverAccount().getId() + " not found"));
 
         if (sender.getStatus() != AccountStatus.ACTIVE || receiver.getStatus() != AccountStatus.ACTIVE) {
-            throw new AccountProcessingException("Both accounts must be active to perform the transaction.");
+            throw new UnprocessableEntityException("Both accounts must be active to perform the transaction.");
         }
 
         if (transaction.getAmount().compareTo(sender.getBalance()) > 0) {
-            throw new AccountProcessingException("Insufficient funds in sender's account.");
+            throw new UnprocessableEntityException("Insufficient funds in sender's account.");
         }
 
         sender.setBalance(sender.getBalance().subtract(transaction.getAmount()));

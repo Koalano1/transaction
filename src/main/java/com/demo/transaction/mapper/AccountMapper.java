@@ -1,7 +1,6 @@
 package com.demo.transaction.mapper;
 
 import com.demo.transaction.dto.AccountRequestDto;
-import com.demo.transaction.dto.AccountResponseDto;
 import com.demo.transaction.model.entities.Account;
 import org.springframework.stereotype.Component;
 

@@ -1,6 +1,6 @@
 package com.demo.transaction.service.impl;
 
-import com.demo.transaction.exception.AccountProcessingException;
+import com.demo.transaction.exception.UnprocessableEntityException;
 import com.demo.transaction.mapper.AccountMapper;
 import com.demo.transaction.model.entities.Account;
 import com.demo.transaction.model.enums.AccountStatus;
@@ -27,7 +27,7 @@ public class AccountServiceImpl implements AccountService {
         Optional<Account> existingUserWithUserName = accountRepository.findByUsername(account.getUsername());
 
         if (existingUserWithUserName.isPresent()) {
-            throw new AccountProcessingException("User with username " + account.getUsername() + " already exists");
+            throw new UnprocessableEntityException("User with username " + account.getUsername() + " already exists");
         }
 
         if (account.getStatus() == null) {

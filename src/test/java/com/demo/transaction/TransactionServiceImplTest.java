@@ -1,7 +1,6 @@
 package com.demo.transaction;
 
-import com.demo.transaction.exception.AccountProcessingException;
-import com.demo.transaction.mapper.AccountMapper;
+import com.demo.transaction.exception.UnprocessableEntityException;
 import com.demo.transaction.model.entities.Account;
 import com.demo.transaction.model.entities.Transaction;
 import com.demo.transaction.model.enums.AccountStatus;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,12 +29,6 @@ public class TransactionServiceImplTest {
 
     @Mock
     private TransactionRepository transactionRepository;
-
-    @Mock
-    private AccountMapper accountMapper;
-
-    @Mock
-    private RabbitTemplate rabbitTemplate;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -86,7 +78,7 @@ public class TransactionServiceImplTest {
         when(accountRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
         when(accountRepository.findById(receiver.getId())).thenReturn(Optional.empty());
 
-        Exception exception = assertThrows(AccountProcessingException.class, () ->
+        Exception exception = assertThrows(UnprocessableEntityException.class, () ->
                 transactionService.createTransaction(transaction));
 
         assertEquals("Receiver account with ID 2 not found", exception.getMessage());
@@ -98,7 +90,7 @@ public class TransactionServiceImplTest {
         when(accountRepository.findById(sender.getId())).thenReturn(Optional.of(sender));
         when(accountRepository.findById(receiver.getId())).thenReturn(Optional.of(receiver));
 
-        Exception exception = assertThrows(AccountProcessingException.class, () ->
+        Exception exception = assertThrows(UnprocessableEntityException.class, () ->
                 transactionService.createTransaction(transaction));
 
         assertEquals("Both accounts must be active to perform the transaction.", exception.getMessage());

@@ -16,7 +16,7 @@ public class DistributedTransactionParticipant {
 
     private final String senderAccount;
 
-        private final String receiverAccount;
+    private final String receiverAccount;
 
     private TransactionStatus status;
 

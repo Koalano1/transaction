@@ -1,6 +1,7 @@
 package com.demo.transaction.dto;
 
 import com.demo.transaction.model.enums.AccountStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -14,8 +15,6 @@ import java.time.LocalDateTime;
 @Getter
 public class AccountResponseDto {
 
-    private Long id;
-
     private String username;
 
     private String email;
@@ -24,8 +23,10 @@ public class AccountResponseDto {
 
     private AccountStatus status;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
 
 }

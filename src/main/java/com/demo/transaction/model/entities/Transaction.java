@@ -3,8 +3,7 @@ package com.demo.transaction.model.entities;
 import com.demo.transaction.model.enums.TransactionType;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -14,20 +13,21 @@ import java.time.LocalDateTime;
 @Table(name = "transactions")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false)
-    private Long id;
+    private String id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sender_account_id", nullable = false)
-    private Account senderAccount;
+    @JoinColumn(name = "sender_id", nullable = false)
+    private String senderId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "receiver_account_id", nullable = false)
-    private Account receiverAccount;
+    @Column(name = "receiver_id", nullable = false)
+    private String receiverId;
 
     @Column(name = "amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
@@ -36,8 +36,9 @@ public class Transaction {
     @Column(name = "type", nullable = false)
     private TransactionType type;
 
+    @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
-    @Column(name = "created_at", nullable = false, updatable = false, insertable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
 }

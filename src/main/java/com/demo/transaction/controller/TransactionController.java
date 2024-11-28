@@ -1,5 +1,8 @@
 package com.demo.transaction.controller;
 
+import com.demo.transaction.dto.RecordResponseTransactionDto;
+import com.demo.transaction.dto.TransactionRequestDto;
+import com.demo.transaction.dto.TransactionResponseDto;
 import com.demo.transaction.model.entities.Transaction;
 import com.demo.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -17,21 +20,25 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public ResponseEntity<List<Transaction>> createTransaction(@RequestBody List<Transaction> transaction) {
-        List<Transaction> savedTransactions = new ArrayList<>();
-
-        for (Transaction tr : transaction) {
-            savedTransactions.add(transactionService.createTransaction(tr));
-        }
-        return ResponseEntity.ok(savedTransactions);
+    public List<TransactionResponseDto> createTransaction(@RequestBody TransactionRequestDto request) {
+        List<Transaction> transactions = transactionService.createTransaction(request);
+        List<TransactionResponseDto> transactionResponses = new ArrayList<>();
+        transactions.forEach(transaction -> {
+            TransactionResponseDto transactionResponse = TransactionResponseDto.builder()
+                    .id(transaction.getId())
+                    .senderAccountNumber(transaction.getSenderId())
+                    .receiverAccountNumber(transaction.getReceiverId())
+                    .amount(transaction.getAmount())
+                    .transactionType(transaction.getType())
+                    .build();
+            transactionResponses.add(transactionResponse);
+        });
+        return transactionResponses;
     }
 
     @GetMapping("users/{userId}")
-    public ResponseEntity<List<Transaction>> getTransactionById(@PathVariable Long userId) {
-        List<Transaction> transactions = transactionService.listTransactionsByUserId(userId);
-        if (transactions.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(transactions);
+    public List<RecordResponseTransactionDto> getTransactionsByUserId(@PathVariable String userId) {
+        return transactionService.getAllUsersByUserId(userId);
     }
+
 }

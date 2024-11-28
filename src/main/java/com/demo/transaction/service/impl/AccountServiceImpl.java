@@ -1,5 +1,7 @@
 package com.demo.transaction.service.impl;
 
+import com.demo.transaction.dto.AccountRequestDto;
+import com.demo.transaction.dto.AccountResponseDto;
 import com.demo.transaction.exception.UnprocessableEntityException;
 import com.demo.transaction.mapper.AccountMapper;
 import com.demo.transaction.model.entities.Account;
@@ -8,7 +10,6 @@ import com.demo.transaction.repository.AccountRepository;
 import com.demo.transaction.service.AccountService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,31 +24,25 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
 
     @Override
-    public ResponseEntity<Account> register(Account account) {
-        Optional<Account> existingUserWithUserName = accountRepository.findByUsername(account.getUsername());
+    public AccountResponseDto register(AccountRequestDto request) {
+        Optional<Account> existingUserWithUserName = accountRepository.findByUsername(request.getUsername());
 
         if (existingUserWithUserName.isPresent()) {
-            throw new UnprocessableEntityException("User with username " + account.getUsername() + " already exists");
+            throw new UnprocessableEntityException("User with username " + request.getUsername() + " already exists");
         }
 
-        if (account.getStatus() == null) {
-            account.setStatus(AccountStatus.ACTIVE);
+        if (request.getStatus() == null) {
+            request.setStatus(AccountStatus.ACTIVE);
         }
 
-        if (account.getBalance() == null) {
-            account.setBalance(BigDecimal.ZERO);
+        if (request.getBalance() == null) {
+            request.setBalance(BigDecimal.ZERO);
         }
 
-        Account user = Account.builder()
-                .username(account.getUsername())
-                .email(account.getEmail())
-                .status(account.getStatus())
-                .balance(account.getBalance())
-                .build();
-
+        Account user = accountMapper.toEntity(request);
         accountRepository.save(user);
 
-        return ResponseEntity.ok(user);
+        return accountMapper.toDto(user);
     }
 
 }

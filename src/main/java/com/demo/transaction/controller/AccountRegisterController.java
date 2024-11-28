@@ -1,9 +1,10 @@
 package com.demo.transaction.controller;
 
-import com.demo.transaction.model.entities.Account;
+import com.demo.transaction.dto.AccountRequestDto;
+import com.demo.transaction.dto.AccountResponseDto;
 import com.demo.transaction.service.AccountService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +15,8 @@ public class AccountRegisterController {
     private final AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<Account> register(@RequestBody Account account) {
-        return accountService.register(account);
+    @ResponseStatus(HttpStatus.CREATED)
+    public AccountResponseDto register(@RequestBody AccountRequestDto request) {
+        return accountService.register(request);
     }
 }

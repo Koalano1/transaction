@@ -9,8 +9,12 @@ import com.demo.transaction.model.enums.AccountStatus;
 import com.demo.transaction.repository.AccountRepository;
 import com.demo.transaction.repository.TransactionRepository;
 import com.demo.transaction.service.TransactionService;
+import com.rabbitmq.client.ConnectionFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
@@ -21,11 +25,14 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final RabbitTemplate rabbitTemplate;
     private final AccountRepository accountRepository;
+    private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
+    private static final long PESSIMISTIC_LOCK_TIMEOUT = 200;
 
     @Override
     @Transactional

@@ -1,4 +1,4 @@
-package com.demo.transaction;
+package com.demo.transaction.service;
 
 import com.demo.transaction.dto.RecordResponseTransactionDto;
 import com.demo.transaction.dto.TransactionRequestDto;

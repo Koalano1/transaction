@@ -13,7 +13,6 @@ import com.demo.transaction.repository.filter.TransactionFilter;
 import com.demo.transaction.repository.specification.TransactionSpecification;
 import com.demo.transaction.repository.specification.TransactionSpecificationCreator;
 import com.demo.transaction.service.TransactionService;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -21,9 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -42,7 +42,7 @@ public class TransactionServiceImpl implements TransactionService {
     private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<Transaction> createTransaction(TransactionRequestDto request) {
         Account sender = accountRepository.findById(request.getSenderAccountId())
                 .orElseThrow(() -> new UnprocessableEntityException("Sender account with ID " +
@@ -77,7 +77,6 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    @Transactional
     public List<RecordResponseTransactionDto> getAllUsersByUserId(String username) {
         String userId = getUserIdByUserId(username);
 

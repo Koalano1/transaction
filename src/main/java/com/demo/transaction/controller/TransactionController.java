@@ -7,8 +7,8 @@ import com.demo.transaction.model.entities.Transaction;
 import com.demo.transaction.model.enums.TransactionType;
 import com.demo.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Parameter;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -46,10 +46,19 @@ public class TransactionController {
 
     @GetMapping
     public Page<Transaction> getTransactions(@RequestParam String userId,
-                                             @RequestParam(required = false) BigDecimal amount,
-                                             @RequestParam(required = false) TransactionType type,
-                                             @RequestParam(defaultValue = "0") int page,
-                                             @RequestParam(defaultValue = "10") int size) {
+
+                                             @RequestParam(required = false)
+                                             BigDecimal amount,
+
+                                             @RequestParam(value = "type",required = false)
+                                             @Parameter(description = "Search by type")
+                                             TransactionType type,
+
+                                             @RequestParam(value = "page", defaultValue = "1")
+                                             int page,
+
+                                             @RequestParam(value = "size", defaultValue = "10")
+                                             int size) {
         return transactionService.getTransactions(userId, amount, type, page, size);
     }
 

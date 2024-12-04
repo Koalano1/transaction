@@ -7,4 +7,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./docker/mysql/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./docker/
+      - mysql/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql

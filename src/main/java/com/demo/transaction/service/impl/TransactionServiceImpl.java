@@ -6,18 +6,26 @@ import com.demo.transaction.exception.UnprocessableEntityException;
 import com.demo.transaction.model.entities.Account;
 import com.demo.transaction.model.entities.Transaction;
 import com.demo.transaction.model.enums.AccountStatus;
+import com.demo.transaction.model.enums.TransactionType;
 import com.demo.transaction.repository.AccountRepository;
 import com.demo.transaction.repository.TransactionRepository;
+import com.demo.transaction.repository.filter.TransactionFilter;
+import com.demo.transaction.repository.specification.TransactionSpecification;
+import com.demo.transaction.repository.specification.TransactionSpecificationCreator;
 import com.demo.transaction.service.TransactionService;
-import com.rabbitmq.client.ConnectionFactory;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +40,6 @@ public class TransactionServiceImpl implements TransactionService {
     private final RabbitTemplate rabbitTemplate;
     private final AccountRepository accountRepository;
     private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
-    private static final long PESSIMISTIC_LOCK_TIMEOUT = 200;
 
     @Override
     @Transactional
@@ -77,6 +84,33 @@ public class TransactionServiceImpl implements TransactionService {
         List<Transaction> transactions = getTransactionByUserId(userId);
 
         return mapTransactionToRecordResponse(transactions, userId);
+    }
+
+    @Override
+    public Page<Transaction> getTransactions(String userId,
+                                             BigDecimal amount,
+                                             TransactionType type,
+                                             int page,
+                                             int size) {
+        TransactionFilter filter = TransactionFilter.builder()
+                .userId(userId)
+                .type(type)
+                .build();
+
+        Specification<Transaction> specification = TransactionSpecificationCreator.from(filter);
+
+        if("sender".equalsIgnoreCase(filter.getUserId())) {
+            specification = specification.and(TransactionSpecification.isSender(userId));
+        } else if("receiver".equalsIgnoreCase(filter.getUserId())) {
+            specification = specification.and(TransactionSpecification.isReceiver(userId));
+        } else {
+            specification = specification.and(TransactionSpecification.hasUserId(userId));
+        }
+        if(amount != null) {
+            specification = specification.and(TransactionSpecification.hasAmount(amount));
+        }
+
+        return transactionRepository.findAll(specification, PageRequest.of(page,size));
     }
 
     private List<RecordResponseTransactionDto> mapTransactionToRecordResponse(List<Transaction> transactions, String userId) {

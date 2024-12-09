@@ -1,6 +1,6 @@
 spring:
   datasource:
-    driver-class-name: org.apache.derby.jdbc.EmbeddedDriver
+    driver-class-name:
     url: jdbc:derby:memory:myDb;create=true
     username: sa
     password: sa

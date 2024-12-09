@@ -1,18 +1,16 @@
 package com.demo.transaction.service.impl;
 
 import com.demo.transaction.dto.RecordResponseTransactionDto;
-import com.demo.transaction.dto.TransactionRequestDto;
 import com.demo.transaction.exception.UnprocessableEntityException;
 import com.demo.transaction.model.entities.Account;
 import com.demo.transaction.model.entities.Transaction;
-import com.demo.transaction.model.enums.AccountStatus;
 import com.demo.transaction.model.enums.TransactionType;
 import com.demo.transaction.repository.AccountRepository;
 import com.demo.transaction.repository.TransactionRepository;
 import com.demo.transaction.repository.filter.TransactionFilter;
 import com.demo.transaction.repository.specification.TransactionSpecification;
 import com.demo.transaction.repository.specification.TransactionSpecificationCreator;
-import com.demo.transaction.service.TransactionService;
+import com.demo.transaction.service.TransactionQueryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -22,11 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,48 +29,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TransactionServiceImpl implements TransactionService {
+public class TransactionQueryServiceImpl implements TransactionQueryService {
 
     private final TransactionRepository transactionRepository;
     private final RabbitTemplate rabbitTemplate;
     private final AccountRepository accountRepository;
-    private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
-
-    @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<Transaction> createTransaction(TransactionRequestDto request) {
-        Account sender = accountRepository.findById(request.getSenderAccountId())
-                .orElseThrow(() -> new UnprocessableEntityException("Sender account with ID " +
-                        request.getSenderAccountId() + " not found"));
-
-        Account receiver = accountRepository.findById(request.getReceiverAccountId())
-                .orElseThrow(() -> new UnprocessableEntityException("Receiver account with ID " +
-                        request.getReceiverAccountId() + " not found"));
-
-        if (sender.getStatus() != AccountStatus.ACTIVE || receiver.getStatus() != AccountStatus.ACTIVE) {
-            throw new UnprocessableEntityException("Both accounts must be active to perform the transaction.");
-        }
-
-        if (request.getAmount().compareTo(sender.getBalance()) > 0) {
-            throw new UnprocessableEntityException("Insufficient funds in sender's account.");
-        }
-
-        sender.setBalance(sender.getBalance().subtract(request.getAmount()));
-        receiver.setBalance(receiver.getBalance().add(request.getAmount()));
-
-        accountRepository.save(sender);
-        accountRepository.save(receiver);
-
-        Transaction transaction = Transaction.builder()
-                .senderId(request.getSenderAccountId())
-                .receiverId(request.getReceiverAccountId())
-                .amount(request.getAmount())
-                .type(request.getTransactionType())
-                .createdAt(LocalDateTime.now())
-                .build();
-        return List.of(transactionRepository.save(transaction));
-    }
-
+    //private static final Logger logger = LoggerFactory.getLogger(TransactionServiceImpl.class);
     @Override
     public List<RecordResponseTransactionDto> getAllUsersByUserId(String username) {
         String userId = getUserIdByUserId(username);
@@ -169,5 +128,4 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new UnprocessableEntityException("User with username " + username + " not found"));
         return user.getId();
     }
-
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/transactions")
+//for WRITE controller
 @ConditionalOnProperty(name = "app.write.enabled", havingValue = "true")
 public class TransactionCommandController {
 
